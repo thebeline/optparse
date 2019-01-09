@@ -3,6 +3,7 @@
 # Source the optparse.bash file ---------------------------------------------------
 source optparse.bash
 # Define options
+#optparse_usage_header="[OPTIONS] <args>"
 optparse.define short=f long=file desc="The file to process" variable=file
 optparse.define short=o long=output desc="The output file" variable=output default=head_output.txt
 optparse.define short=l long=lines desc="The number of lines to head (default:5)" variable=lines default=5
