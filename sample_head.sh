@@ -6,8 +6,8 @@ source optparse.bash
 #optparse_usage_header="[OPTIONS] <args>"
 optparse.define short=f long=file desc="The file to process" variable=file
 optparse.define short=o long=output desc="The output file" variable=output default=head_output.txt
-optparse.define short=l long=lines desc="The number of lines to head (default:5)" variable=lines default=5
-optparse.define short=v long=verbose desc="Flag to set verbose mode on" variable=verbose_mode value=true default=false
+optparse.define short=l long=lines desc="The number of lines to head" variable=lines default=5
+optparse.define short=v long=verbose desc="Flag to set verbose mode on" variable=verbose_mode flag=true
 # Source the output file ----------------------------------------------------------
 source $( optparse.build )
 
@@ -18,7 +18,7 @@ fi
 
 # Display arguments
 if [ "$verbose_mode" = "true" ]; then
-	echo "Verbose mode ON"	
+	echo "Verbose mode ON"
 	echo "FILE  : $file"
 	echo "OUTPUT: $output"
 	echo "LINES : $lines"
@@ -37,4 +37,3 @@ cat $file | head -n $lines > $output
 if [ "$verbose_mode" = "true" ]; then echo "Done."; fi
 
 exit 0
-	
