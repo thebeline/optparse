@@ -92,7 +92,7 @@ function optparse.define(){
         if [ "$val" = "" ]; then
                 val="\$2"
         fi
-        
+
         # build OPTIONS and help
         optparse_usage="${optparse_usage}#NL#TB${short} $(printf "%-25s %s" "${long}:" "${desc}")"
         $flag && optparse_usage="${optparse_usage} [flag]"
