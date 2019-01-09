@@ -22,6 +22,7 @@
 # THE SOFTWARE.
 #
 # Author: Nagarjuna Kumarappan <nagarjuna.412@gmail.com>
+# Improvements: Alessio Biancone <alebian1996@gmail.com>
 
 optparse_usage=""
 optparse_contractions=""
