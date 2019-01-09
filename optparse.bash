@@ -28,7 +28,10 @@ optparse_usage=""
 optparse_contractions=""
 optparse_defaults=""
 optparse_process=""
-optparse_arguments_string=""
+optparse_arguments_string="h"
+optparse_longarguments_string="help"
+optparse_name="$(basename $0)"
+optparse_usage_header="[OPTIONS]"
 
 # -----------------------------------------------------------------------------------------------------------------------------
 function optparse.throw_error(){
@@ -40,12 +43,13 @@ function optparse.throw_error(){
 # -----------------------------------------------------------------------------------------------------------------------------
 function optparse.define(){
         if [ $# -lt 3 ]; then
-                optparse.throw_error "optparse.define <short> <long> <variable> [<desc>] [<default>] [<value>]"
+                optparse.throw_error "optparse.define <short> <long> <variable> [<desc>] [<default>] [<value>] [<type>]"
         fi
         for option_id in $( seq 1 $# ) ; do
                 local option="$( eval "echo \$$option_id")"
                 local key="$( echo $option | awk -F "=" '{print $1}' )";
                 local value="$( echo $option | awk -F "=" '{print $2}' )";
+                local val=""
 
                 #essentials: shortname, longname, description
                 if [ "$key" = "short" ]; then
@@ -64,6 +68,8 @@ function optparse.define(){
                         local desc="$value"
                 elif [ "$key" = "default" ]; then
                         local default="$value"
+                elif [ "$key" = "flag" ]; then
+                        local flag="true"
                 elif [ "$key" = "variable" ]; then
                         local variable="$value"
                 elif [ "$key" = "value" ]; then
@@ -71,92 +77,84 @@ function optparse.define(){
                 fi
         done
 
+        # default value for flag
+        flag=${flag:='false'}
+
+        $flag && {
+            default=false
+            val=true
+        }
+
         if [ "$variable" = "" ]; then
                 optparse.throw_error "You must give a variable for option: ($short/$long)"
         fi
 
         if [ "$val" = "" ]; then
-                val="\$OPTARG"
+                val="\$2"
         fi
-
+        
         # build OPTIONS and help
-		optparse_usage="${optparse_usage}#NL#TB${short} $(printf "%-25s %s" "${long}:" "${desc}")"
+        optparse_usage="${optparse_usage}#NL#TB${short} $(printf "%-25s %s" "${long}:" "${desc}")"
+        $flag && optparse_usage="${optparse_usage} [flag]"
+
         if [ "$default" != "" ]; then
                 optparse_usage="${optparse_usage} [default:$default]"
         fi
+
         optparse_contractions="${optparse_contractions}#NL#TB#TB${long})#NL#TB#TB#TBparams=\"\$params ${short}\";;"
         if [ "$default" != "" ]; then
                 optparse_defaults="${optparse_defaults}#NL${variable}=${default}"
         fi
         optparse_arguments_string="${optparse_arguments_string}${shortname}"
-        if [ "$val" = "\$OPTARG" ]; then
+        optparse_longarguments_string="${optparse_longarguments_string},${longname}"
+        if [ "$val" = "\$2" ]; then
                 optparse_arguments_string="${optparse_arguments_string}:"
+                optparse_longarguments_string="${optparse_longarguments_string}:"
         fi
-        optparse_process="${optparse_process}#NL#TB#TB${shortname})#NL#TB#TB#TB${variable}=\"$val\";;"
+        optparse_process="${optparse_process}#NL#TB#TB-${shortname}|--${longname})#NL#TB#TB#TB${variable}=\"$val\"; $flag || shift;;"
 }
 
 # -----------------------------------------------------------------------------------------------------------------------------
 function optparse.build(){
-        local build_file="/tmp/optparse-${RANDOM}.tmp"
+        local build_file="/tmp/optparse-$$.tmp"
 
         # Building getopts header here
 
         # Function usage
         cat << EOF > $build_file
+trap "rm $build_file" EXIT
+
 function usage(){
 cat << XXX
-usage: \$0 [OPTIONS]
-
+usage: $optparse_name $optparse_usage_header
 OPTIONS:
         $optparse_usage
-
-        -? --help  :  usage
+        -h --help:                   usage
 
 XXX
 }
 
-# Contract long options into short options
-params=""
-while [ \$# -ne 0 ]; do
-        param="\$1"
-        shift
-
-        case "\$param" in
-                $optparse_contractions
-                "-?"|--help)
-                        usage
-                        exit 0;;
-                *)
-                        if [[ "\$param" == --* ]]; then
-                                echo -e "Unrecognized long option: \$param"
-                                usage
-                                exit 1
-                        fi
-                        params="\$params \"\$param\"";;
-        esac
-done
-
-eval set -- "\$params"
+PARSED="\$(getopt --options=$optparse_arguments_string --longoptions=$optparse_longarguments_string -- \$@)"
+[[ \$? != 0 ]] && usage
+eval set -- "\$PARSED"
 
 # Set default variable values
 $optparse_defaults
 
 # Process using getopts
-while getopts "$optparse_arguments_string" option; do
-        case \$option in
+while true; do
+        case \$1 in
                 # Substitute actions for different variables
                 $optparse_process
-                :)
-                        echo "Option - \$OPTARG requires an argument"
-                        exit 1;;
-                *)
+                --)
+                        shift
+                        break;;
+                --help|-h|*)
                         usage
                         exit 1;;
         esac
+        shift
 done
-
-# Clean up after self
-rm $build_file
 
 EOF
 
@@ -172,6 +170,7 @@ EOF
         unset optparse_arguments_string
         unset optparse_defaults
         unset optparse_contractions
+        unset optparse_name
 
         # Return file name to parent
         echo "$build_file"
