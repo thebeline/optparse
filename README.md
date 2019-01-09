@@ -59,6 +59,8 @@ the value to set the variable to. If unspecified, user is expected to provide a 
 a short description of the argument (to build the usage description)
 #### `default`(optional)
 the default value to set the variable to if argument not specified
+#### `flag`(optional)
+define if option is a flag or not
 
 ## Installation
 1. Download/clone `optparse.bash`
