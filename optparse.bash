@@ -112,6 +112,8 @@ function optparse.define(){
                 optparse_longarguments_string="${optparse_longarguments_string}:"
         fi
         optparse_process="${optparse_process}#NL#TB#TB-${shortname}|--${longname})#NL#TB#TB#TB${variable}=\"$val\"; $flag || shift;;"
+
+        optparse_variable_set="${optparse_variable_set}[[ -z \$${variable} ]] && { echo 'ERROR: (-${shortname}|--${longname}) not set'; usage; exit 1; } #NL"
 }
 
 # -----------------------------------------------------------------------------------------------------------------------------
@@ -155,6 +157,8 @@ while true; do
         esac
         shift
 done
+
+$optparse_variable_set
 
 EOF
 
