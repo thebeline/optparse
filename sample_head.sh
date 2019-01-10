@@ -11,11 +11,6 @@ optparse.define short=v long=verbose desc="Flag to set verbose mode on" variable
 # Source the output file ----------------------------------------------------------
 source $( optparse.build )
 
-if [ "$file" == "" ]; then
-	echo "ERROR: Please provide a file"
-	exit 1
-fi
-
 # Display arguments
 if [ "$verbose_mode" = "true" ]; then
 	echo "Verbose mode ON"
