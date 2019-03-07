@@ -32,79 +32,83 @@ optparse_arguments_string="h"
 optparse_longarguments_string="help"
 optparse_name="$(basename $0)"
 optparse_usage_header="[OPTIONS]"
+optparse_variable_set=''
 
 # -----------------------------------------------------------------------------------------------------------------------------
 function optparse.throw_error(){
     local message="$1"
-    echo "OPTPARSE: ERROR: $message"
+    echo "OPTPARSE ERROR: $message"
     exit 1
 }
 
 # -----------------------------------------------------------------------------------------------------------------------------
 function optparse.define(){
-    if [ $# -lt 3 ]; then
-        optparse.throw_error "optparse.define <short> <long> <variable> [<desc>] [<default>] [<value>] [<type>]"
-    fi
+    local short=""
+    local long=""
+    local desc=""
+    local default=""
+    local flag="false"
+    local variable=""
+    local val="\$2"
 
     for option in "$@"; do
         local key="${option%=*}";
         local value="${option#*=}";
-        local val=""
 
-        #essentials: shortname, longname, description
-        if [ "$key" = "short" ]; then
-            local shortname="$value"
-            if [ ${#shortname} -ne 1 ]; then
-                optparse.throw_error "short name expected to be one character long"
-            fi
-            local short="-${shortname}"
-        elif [ "$key" = "long" ]; then
-            local longname="$value"
-            if [ ${#longname} -lt 2 ]; then
-                optparse.throw_error "long name expected to be atleast one character long"
-            fi
-            local long="--${longname}"
-        elif [ "$key" = "desc" ]; then
-            local desc="$value"
-        elif [ "$key" = "default" ]; then
-            local default="$value"
-        elif [ "$key" = "flag" ]; then
-            local flag="true"
-        elif [ "$key" = "variable" ]; then
-            local variable="$value"
-        elif [ "$key" = "value" ]; then
-            local val="$value"
-        fi
+        case "$key" in
+            "short")
+                [ ${#value} -ne 1 ] &&
+                    optparse.throw_error "short name expected to be one chracter long"
+                shortname="$value"
+                short="-$value"
+            ;;
+            "long")
+                [ -z ${value} ] &&
+                    optparse.throw_error "long name expected to be atleast one character long"
+                longname="$value"
+                long="--$value"
+            ;;
+            "desc")
+                desc="$value"
+            ;;
+            "default")
+                default="$value"
+            ;;
+            "flag")
+                flag="true"
+            ;;
+            "variable")
+                variable="$value"
+            ;;
+            "value")
+                val="$value"
+            ;;
+        esac
     done
-
-    # default value for flag
-    flag=${flag:='false'}
 
     $flag && {
         default=false
         val=true
     }
 
-    if [ "$variable" = "" ]; then
-        optparse.throw_error "You must give a variable for option: ($short/$long)"
-    fi
+    [ -z "$desc" ] &&
+        optparse.throw_error "description is mandatory"
 
-    if [ "$val" = "" ]; then
-        val="\$2"
-    fi
-
+    [ -z "$variable" ] &&
+        optparse.throw_error "you must give a variable for option: ($short/$long)"
+    
     # build OPTIONS and help
     optparse_usage="${optparse_usage}#TB${short} $(printf "%-15s %s" "${long}:" "${desc}")"
     $flag && optparse_usage="${optparse_usage} [flag]"
 
-    if [ "$default" != "" ]; then
+    if [ -n "${default:-}" ]; then
         optparse_usage="${optparse_usage} [default:$default]"
     fi
 
     optparse_usage="${optparse_usage}#NL"
 
     optparse_contractions="${optparse_contractions}#NL#TB#TB${long})#NL#TB#TB#TBparams=\"\$params ${short}\";;"
-    if [ "$default" != "" ]; then
+    if [ -n "${default:-}" ]; then
         optparse_defaults="${optparse_defaults}#NL${variable}=${default}"
     fi
 
@@ -116,7 +120,7 @@ function optparse.define(){
     fi
 
     optparse_process="${optparse_process}#NL#TB#TB-${shortname}|--${longname})#NL#TB#TB#TB${variable}=\"$val\"; $flag || shift;;"
-    optparse_variable_set="${optparse_variable_set}[[ -z \$${variable} ]] && { echo 'ERROR: (-${shortname}|--${longname}) not set'; usage; exit 1; } #NL"
+    optparse_variable_set="${optparse_variable_set}[[ -z \${${variable}:-} ]] && { echo 'ERROR: (-${shortname}|--${longname}) not set'; usage; exit 1; } #NL"
 }
 
 # -----------------------------------------------------------------------------------------------------------------------------
@@ -176,4 +180,3 @@ EOF
     # Return file name to parent
     echo "$build_file"
 }
-# -----------------------------------------------------------------------------------------------------------------------------
