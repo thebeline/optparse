@@ -94,7 +94,7 @@ function optparse.define(){
     [ -z "$desc" ] && optparse.throw_error "description is mandatory"
 
     [ -z "$variable" ] && optparse.throw_error "you must give a variable for option: ($short/$long)"
-    
+
     # build OPTIONS and help
     optparse_usage+="#TB${short} $(printf "%-15s %s" "${long}:" "${desc}")"
 
@@ -174,6 +174,10 @@ EOF
     unset optparse_defaults
     unset optparse_contractions
     unset optparse_name
+    unset optparse_longarguments_string
+    unset optparse_name
+    unset optparse_usage_header
+    unset optparse_variable_set
 
     # Return file name to parent
     echo "$build_file"
