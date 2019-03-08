@@ -99,12 +99,13 @@ function optparse.define(){
     
     # build OPTIONS and help
     optparse_usage="${optparse_usage}#TB${short} $(printf "%-15s %s" "${long}:" "${desc}")"
-    $flag && optparse_usage="${optparse_usage} [flag]"
 
-    if [ -n "${default:-}" ]; then
-        optparse_usage="${optparse_usage} [default:$default]"
-    fi
-
+    $flag && {
+        optparse_usage="${optparse_usage} [flag]"
+    } || {
+        [ -n "${default:-}" ] &&
+            optparse_usage="${optparse_usage} [default:$default]"
+    }
     optparse_usage="${optparse_usage}#NL"
 
     optparse_contractions="${optparse_contractions}#NL#TB#TB${long})#NL#TB#TB#TBparams=\"\$params ${short}\";;"
