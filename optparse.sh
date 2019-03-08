@@ -139,6 +139,7 @@ $optparse_usage
 #TB-h $(printf "%-15s %s" "--help:" "help")
 
 XXX
+exit 3
 }
 
 PARSED="\$(getopt --options=$optparse_arguments_string --longoptions=$optparse_longarguments_string -- \$@)"
