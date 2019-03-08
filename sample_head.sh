@@ -1,34 +1,34 @@
 #!/usr/bin/env bash
 
 # Source the optparse.bash file ---------------------------------------------------
-source optparse.bash
+source optparse.sh
 # Define options
 #optparse_usage_header="[OPTIONS] <args>"
 optparse.define short=f long=file desc="The file to process" variable=file
 optparse.define short=o long=output desc="The output file" variable=output default=head_output.txt
 optparse.define short=l long=lines desc="The number of lines to head" variable=lines default=5
-optparse.define short=v long=verbose desc="Flag to set verbose mode on" variable=verbose_mode flag=true
+optparse.define short=v long=verbose desc="Flag to set verbose mode on" variable=verbose_mode flag
 # Source the output file ----------------------------------------------------------
-source $( optparse.build )
+. $( optparse.build )
 
 # Display arguments
-if [ "$verbose_mode" = "true" ]; then
+$verbose_mode && {
 	echo "Verbose mode ON"
 	echo "FILE  : $file"
 	echo "OUTPUT: $output"
 	echo "LINES : $lines"
-fi
+}
 
 # Check if input file exists
-if [ "$verbose_mode" = "true" ]; then echo "Checking input file $file..." ; fi
-if [ ! -f $file ]; then
+[ "$verbose_mode" = "true" ] && echo "Checking input file $file..."
+[ ! -f $file ] && {
 	echo "File does not exist"
 	exit 1
-fi
+}
 
-if [ "$verbose_mode" = "true" ]; then echo "Heading first $lines lines into $output..." ; fi
+[ "$verbose_mode" = "true" ] && echo "Heading first $lines lines into $output..."
 cat $file | head -n $lines > $output
 
-if [ "$verbose_mode" = "true" ]; then echo "Done."; fi
+[ "$verbose_mode" = "true" ] && echo "Done."
 
 exit 0
