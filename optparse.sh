@@ -91,37 +91,34 @@ function optparse.define(){
         val=true
     }
 
-    [ -z "$desc" ] &&
-        optparse.throw_error "description is mandatory"
+    [ -z "$desc" ] && optparse.throw_error "description is mandatory"
 
-    [ -z "$variable" ] &&
-        optparse.throw_error "you must give a variable for option: ($short/$long)"
+    [ -z "$variable" ] && optparse.throw_error "you must give a variable for option: ($short/$long)"
     
     # build OPTIONS and help
-    optparse_usage="${optparse_usage}#TB${short} $(printf "%-15s %s" "${long}:" "${desc}")"
+    optparse_usage+="#TB${short} $(printf "%-15s %s" "${long}:" "${desc}")"
 
     $flag && {
-        optparse_usage="${optparse_usage} [flag]"
+        optparse_usage+=" [flag]"
     } || {
         [ -n "${default:-}" ] &&
-            optparse_usage="${optparse_usage} [default:$default]"
+            optparse_usage+=" [default:$default]"
     }
-    optparse_usage="${optparse_usage}#NL"
+    optparse_usage+="#NL"
 
-    optparse_contractions="${optparse_contractions}#NL#TB#TB${long})#NL#TB#TB#TBparams=\"\$params ${short}\";;"
-    if [ -n "${default:-}" ]; then
-        optparse_defaults="${optparse_defaults}#NL${variable}=${default}"
-    fi
+    optparse_contractions+="#NL#TB#TB${long})#NL#TB#TB#TBparams=\"\$params ${short}\";;"
+    [ -n "${default:-}" ] &&
+        optparse_defaults+="#NL${variable}=${default}"
 
-    optparse_arguments_string="${optparse_arguments_string}${shortname}"
-    optparse_longarguments_string="${optparse_longarguments_string},${longname}"
-    if [ "$val" = "\$2" ]; then
-        optparse_arguments_string="${optparse_arguments_string}:"
-        optparse_longarguments_string="${optparse_longarguments_string}:"
-    fi
+    optparse_arguments_string+="${shortname}"
+    optparse_longarguments_string+=",${longname}"
+    [ "$val" = "\$2" ] && {
+        optparse_arguments_string+=":"
+        optparse_longarguments_string+=":"
+    }
 
-    optparse_process="${optparse_process}#NL#TB#TB-${shortname}|--${longname})#NL#TB#TB#TB${variable}=\"$val\"; $flag || shift;;"
-    optparse_variable_set="${optparse_variable_set}[[ -z \${${variable}:-} ]] && { echo 'ERROR: (-${shortname}|--${longname}) not set'; usage; exit 1; } #NL"
+    optparse_process+="#NL#TB#TB-${shortname}|--${longname})#NL#TB#TB#TB${variable}=\"$val\"; $flag || shift;;"
+    optparse_variable_set+="[[ -z \${${variable}:-} ]] && { echo 'ERROR: (-${shortname}|--${longname}) not set'; usage; exit 1; } #NL"
 }
 
 # -----------------------------------------------------------------------------------------------------------------------------
