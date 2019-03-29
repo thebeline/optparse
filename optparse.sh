@@ -44,12 +44,15 @@ function optparse.throw_error(){
 # -----------------------------------------------------------------------------------------------------------------------------
 function optparse.define(){
     local short=""
+    local shortname=""
     local long=""
+    local longname=""
     local desc=""
     local default=""
     local flag="false"
     local variable=""
     local val="\$2"
+    local has_default="false"
 
     for option in "$@"; do
         local key="${option%=*}";
@@ -73,6 +76,7 @@ function optparse.define(){
             ;;
             "default")
                 default="$value"
+                has_default="true"
             ;;
             "flag")
                 flag="true"
@@ -118,7 +122,7 @@ function optparse.define(){
     }
 
     optparse_process+="#NL#TB#TB-${shortname}|--${longname})#NL#TB#TB#TB${variable}=\"$val\"; $flag || shift;;"
-    optparse_variable_set+="[[ -z \${${variable}:-} ]] && { echo 'ERROR: (-${shortname}|--${longname}) not set'; usage; exit 1; } #NL"
+    optparse_variable_set+="[[ -z \${${variable}:-} ]] && { echo 'ERROR: (--${longname}) not set'; usage; exit 1; } #NL"
 }
 
 # -----------------------------------------------------------------------------------------------------------------------------
