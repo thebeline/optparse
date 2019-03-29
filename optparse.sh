@@ -96,7 +96,7 @@ function optparse.define(){
     [ -z "$variable" ] && optparse.throw_error "you must give a variable for option: ($short/$long)"
 
     # build OPTIONS and help
-    optparse_usage+="#TB${short} $(printf "%-15s %s" "${long}:" "${desc}")"
+    optparse_usage+="#TB${short:=  }$([ ! -z $short ] && echo "," || echo " ") $(printf "%-15s %s" "${long}:" "${desc}")"
 
     $flag && {
         optparse_usage+=" [flag]"
@@ -136,7 +136,7 @@ cat << XXX
 usage: $optparse_name $optparse_usage_header
 OPTIONS:
 $optparse_usage
-#TB-h $(printf "%-15s %s" "--help:" "help")
+#TB-h, $(printf "%-15s %s" "--help:" "help")
 
 XXX
 exit 3
