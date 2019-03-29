@@ -111,7 +111,7 @@ function optparse.define(){
     optparse_usage+="#NL"
 
     optparse_contractions+="#NL#TB#TB${long})#NL#TB#TB#TBparams=\"\$params ${short}\";;"
-    [ -n "${default:-}" ] &&
+    $has_default &&
         optparse_defaults+="#NL${variable}=${default}"
 
     optparse_arguments_string+="${shortname}"
@@ -122,7 +122,7 @@ function optparse.define(){
     }
 
     optparse_process+="#NL#TB#TB-${shortname}|--${longname})#NL#TB#TB#TB${variable}=\"$val\"; $flag || shift;;"
-    optparse_variable_set+="[[ -z \${${variable}:-} ]] && { echo 'ERROR: (--${longname}) not set'; usage; exit 1; } #NL"
+    optparse_variable_set+="[[ -z \${${variable}:-$($has_default && echo 'DEF')} ]] && { echo 'ERROR: (--${longname}) not set'; usage; exit 1; } #NL"
 }
 
 # -----------------------------------------------------------------------------------------------------------------------------
