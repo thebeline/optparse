@@ -105,8 +105,8 @@ function optparse.define(){
     $flag && {
         optparse_usage+=" [flag]"
     } || {
-        [ -n "${default:-}" ] &&
-            optparse_usage+=" [default:$default]"
+        ${has_default} &&
+            optparse_usage+=" [default: $default]"
     }
     optparse_usage+="#NL"
 
