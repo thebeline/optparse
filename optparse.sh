@@ -117,7 +117,8 @@ function optparse.define(){
     optparse_arguments_string+="${shortname}"
     optparse_longarguments_string+=",${longname}"
     [ "$val" = "\$2" ] && {
-        optparse_arguments_string+=":"
+        [ -z ${shortname:-} ] ||
+            optparse_arguments_string+=":"
         optparse_longarguments_string+=":"
     }
 
