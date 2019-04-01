@@ -61,7 +61,7 @@ function optparse.define(){
         case "$key" in
             "short")
                 [ ${#value} -ne 1 ] &&
-                    optparse.throw_error "short name expected to be one chracter long"
+                    optparse.throw_error "short name expected to be one character long"
                 shortname="$value"
                 short="-$value"
             ;;
