@@ -97,7 +97,7 @@ function optparse.define(){
 
     [ -z "$desc" ] && optparse.throw_error "description is mandatory"
 
-    [ -z "$variable" ] && optparse.throw_error "you must give a variable for option: ($short/$long)"
+    [ -z "$variable" ] && optparse.throw_error "you must give a variable for option: ($longname)"
 
     # build OPTIONS and help
     optparse_usage+="#TB${short:=  }$([ ! -z $short ] && echo "," || echo " ") $(printf "%-15s %s" "${long}:" "${desc}")"
