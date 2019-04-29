@@ -92,6 +92,7 @@ function optparse.define(){
 
     $flag && {
         default=false
+        has_default=true
         val=true
     }
 
