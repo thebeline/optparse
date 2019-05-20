@@ -124,7 +124,7 @@ function optparse.define(){
     }
 
     optparse_process+="#NL#TB#TB-${shortname}|--${longname})#NL#TB#TB#TB${variable}=\"$val\"; $flag || shift;;"
-    optparse_variable_set+="[[ -z \${${variable}:-$($has_default && echo 'DEF')} ]] && { echo 'ERROR: (--${longname}) not set'; usage; exit 1; } #NL"
+    optparse_variable_set+="[[ -z \${${variable}:-$($has_default && echo 'DEF' || echo '')} ]] && { echo 'ERROR: (--${longname}) not set'; usage; exit 1; } || true #NL"
 }
 
 # -----------------------------------------------------------------------------------------------------------------------------
