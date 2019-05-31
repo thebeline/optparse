@@ -9,7 +9,7 @@ optparse.define short=o long=output desc="The output file" variable=output defau
 optparse.define short=l long=lines desc="The number of lines to head" variable=lines default=5
 optparse.define short=v long=verbose desc="Flag to set verbose mode on" variable=verbose_mode flag
 # Source the output file ----------------------------------------------------------
-. $( optparse.build )
+. <( optparse.build )
 
 # Display arguments
 $verbose_mode && {
