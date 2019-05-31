@@ -134,9 +134,7 @@ function optparse.build(){
     # Building getopts header here
 
     # Function usage
-    cat << EOF | sed -e 's/#NL/\n/g' -e 's/#TB/\t/g' > $build_file
-trap "rm $build_file" EXIT
-
+    cat << EOF | sed -e 's/#NL/\n/g' -e 's/#TB/\t/g'
 function usage(){
 cat << XXX
 usage: $optparse_name $optparse_usage_header
@@ -185,7 +183,4 @@ EOF
     unset optparse_name
     unset optparse_usage_header
     unset optparse_variable_set
-
-    # Return file name to parent
-    echo "$build_file"
 }

@@ -7,7 +7,7 @@
     ;   optparse.define short=a long=atest desc=description variable=a
     ;   optparse.define         long=btest desc=description variable=b
     ;   optparse.define short=c long=ctest desc=description variable=c
-    ;   . $(optparse.build)
+    ;   . <(optparse.build)
 
     ;   echo $a $b $c
     '

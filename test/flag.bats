@@ -5,7 +5,7 @@
         source ../optparse.sh
 
     ;   optparse.define short=m long=method desc=description variable=meth flag
-    ;   . $(optparse.build)
+    ;   . <(optparse.build)
 
     ;   echo $meth
     '
@@ -19,7 +19,7 @@
         source ../optparse.sh
 
     ;   optparse.define short=m long=method desc=description variable=meth flag
-    ;   . $(optparse.build)
+    ;   . <(optparse.build)
 
     ;   echo $meth
     '
@@ -33,7 +33,7 @@
         source ../optparse.sh
 
     ;   optparse.define short=m long=method desc=description variable=meth flag
-    ;   . $(optparse.build)
+    ;   . <(optparse.build)
 
     ;   echo $meth
     '
