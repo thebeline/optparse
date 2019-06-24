@@ -91,9 +91,10 @@ function optparse.define(){
     done
 
     $flag && {
-        default=false
+        [ -z $default ] && default=false
         has_default=true
-        val=true
+        [ $default = "true" ] && val="false"
+        [ $default = "false" ] && val="true"
     }
 
     [ -z "$desc" ] && optparse.throw_error "description is mandatory"
