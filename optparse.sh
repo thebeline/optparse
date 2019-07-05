@@ -137,7 +137,7 @@ function optparse.build(){
     # Function usage
     cat << EOF | sed -e 's/#NL/\n/g' -e 's/#TB/\t/g'
 function usage(){
-cat << XXX
+cat >&2 << XXX
 usage: $optparse_name $optparse_usage_header
 OPTIONS:
 $optparse_usage
