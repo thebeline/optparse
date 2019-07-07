@@ -147,7 +147,7 @@ XXX
 exit 3
 }
 
-PARSED="\$(getopt --options=$optparse_arguments_string --longoptions=$optparse_longarguments_string -- \$@)"
+PARSED=\$(getopt --options="$optparse_arguments_string" --longoptions="$optparse_longarguments_string" -- "\$@")
 [[ \$? != 0 ]] && usage
 eval set -- "\$PARSED"
 
