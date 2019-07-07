@@ -114,7 +114,7 @@ function optparse.define(){
 
     optparse_contractions+="#NL#TB#TB${long})#NL#TB#TB#TBparams=\"\$params ${short}\";;"
     $has_default &&
-        optparse_defaults+="#NL${variable}=${default}"
+        optparse_defaults+="#NL${variable}='${default}'"
 
     optparse_arguments_string+="${shortname}"
     optparse_longarguments_string+=",${longname}"
