@@ -56,7 +56,7 @@ function optparse.define(){
     local has_default="false"
 
     for option in "$@"; do
-        local key="${option%=*}";
+        local key="${option%%=*}";
         local value="${option#*=}";
 
         case "$key" in
