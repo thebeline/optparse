@@ -42,16 +42,16 @@
     [ $status -eq 1 ]
 }
 
-@test "list is defined without correct behaviour" {
+@test "behaviour doesn't exists" {
     prog=$'
         source ../optparse.sh
 
-    ;   optparse.define short=m long=var desc=d variable=var list="a b c"
+    ;   optparse.define short=m long=var desc=d variable=var behaviour=null list="a b c"
     ;   . <(optparse.build)
 
     ;   echo $var
     '
 
-    run bash -u <(echo $prog) --var d
+    run bash -u <(echo $prog)
     [ $status -eq 1 ]
 }
