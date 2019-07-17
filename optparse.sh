@@ -49,7 +49,8 @@ function optparse.define(){
     local longname=""
     local desc=""
     local default=""
-    local flag="false"
+    local behaviour="default"
+    local list=""
     local variable=""
     local val="\$2"
     local has_default="false"
@@ -78,8 +79,18 @@ function optparse.define(){
                 default="$value"
                 has_default="true"
             ;;
-            "flag")
-                flag="true"
+            "behaviour")
+                case $value in
+                    default|list|flag)
+                        behaviour="$value"
+                    ;;
+                    *)
+                        optparse.throw_error "behaviour [$value] not supported"
+                    ;;
+                esac
+                ;;
+            "list")
+                list="$value"
             ;;
             "variable")
                 variable="$value"
@@ -90,11 +101,27 @@ function optparse.define(){
         esac
     done
 
+    flag=$([[ $behaviour == "flag" ]] && echo "true" || echo "false")
+    is_list=$([[ $behaviour == "list" ]] && echo "true" || echo "false")
+
     $flag && {
         [ -z $default ] && default=false
         has_default=true
         [ $default = "true" ] && val="false"
         [ $default = "false" ] && val="true"
+    }
+
+    # check list behaviour
+    $is_list && {
+        [[ -z ${list:-} ]] &&
+            optparse.throw_error "list is mandatory when using list behaviour"
+
+        valid=false
+        for i in $list; do
+            [[ $default == $i ]] && valid=true
+        done
+
+        $valid || optparse.throw_error "default should be in list"
     }
 
     [ -z "$desc" ] && optparse.throw_error "description is mandatory"
@@ -103,6 +130,10 @@ function optparse.define(){
 
     # build OPTIONS and help
     optparse_usage+="#TB${short:=  }$([ ! -z $short ] && echo "," || echo " ") $(printf "%-15s %s" "${long}:" "${desc}")"
+
+    $is_list && {
+        optparse_usage+=" [one of: $list]"
+    }
 
     $flag && {
         optparse_usage+=" [flag]"
@@ -124,8 +155,30 @@ function optparse.define(){
         optparse_longarguments_string+=":"
     }
 
-    optparse_process+="#NL#TB#TB-${shortname}|--${longname})#NL#TB#TB#TB${variable}=\"$val\"; $flag || shift;;"
-    optparse_variable_set+="[[ -z \${${variable}:-$($has_default && echo 'DEF' || echo '')} ]] && { echo 'ERROR: (--${longname}) not set'; usage; exit 1; } || true #NL"
+    optparse_process+="
+        -${shortname}|--${longname})
+            ${variable}=\"$val\"
+            $flag ||
+                shift
+            $is_list && {
+                valid=false
+                for i in $list; do
+                    [[ \$${variable} == \$i ]] && valid=true
+                done
+
+                \$valid || {
+                    echo 'ERROR: (--${longname}) value not in list'
+                    usage
+                    exit 1
+                }
+            }
+        ;;"
+    optparse_variable_set+="
+        [[ -z \${${variable}:-$($has_default && echo 'DEF' || echo '')} ]] && {
+            echo 'ERROR: (--${longname}) not set'
+            usage
+            exit 1
+        } || true"
 }
 
 # -----------------------------------------------------------------------------------------------------------------------------

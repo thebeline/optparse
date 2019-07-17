@@ -23,7 +23,7 @@ optparse.define short=f long=file desc="The input file" variable=filename
 Flags are defined in exactly the same way, but with an extra parameter `value` that is assigned to the variable.
 
 ```bash
-optparse.define short=v long=verbose desc="Set flag for verbose mode" variable=verbose_mode value=true default=false
+optparse.define short=v long=verbose desc="Set flag for verbose mode" variable=verbose_mode behaviour="flag"
 ```
 
 ### 2. Evaluate your arguments
@@ -59,5 +59,7 @@ the value to set the variable to. If unspecified, user is expected to provide a 
 a short description of the argument (to build the usage description)
 #### `default`(optional)
 the default value to set the variable to if argument not specified
-#### `flag`(optional)
-define if option is a flag or not
+#### `behaviour`(optional)
+define how an option should behave (default, flag, list)
+#### `list`(optional, mandatory if behaviour is list)
+define possible values for option

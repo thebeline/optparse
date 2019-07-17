@@ -32,13 +32,13 @@
     prog=$'
         source ../optparse.sh
 
-    ;   optparse.define long=method desc=description variable=meth flag
+    ;   optparse.define long=method desc=description variable=meth
     ;   . <(optparse.build)
 
     ;   echo $meth
     '
 
-    run bash -u <(echo $prog) --method
+    run bash -u <(echo $prog) --method 1
     [ $status -eq 0 ]
 }
 

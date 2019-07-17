@@ -7,7 +7,7 @@ source optparse.sh
 optparse.define short=f long=file desc="The file to process" variable=file
 optparse.define short=o long=output desc="The output file" variable=output default=head_output.txt
 optparse.define short=l long=lines desc="The number of lines to head" variable=lines default=5
-optparse.define short=v long=verbose desc="Flag to set verbose mode on" variable=verbose_mode flag
+optparse.define short=v long=verbose desc="Flag to set verbose mode on" variable=verbose_mode behaviour="flag"
 # Source the output file ----------------------------------------------------------
 . <( optparse.build )
 
