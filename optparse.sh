@@ -116,12 +116,14 @@ function optparse.define(){
         [[ -z ${list:-} ]] &&
             optparse.throw_error "list is mandatory when using list behaviour"
 
-        valid=false
-        for i in $list; do
-            [[ $default == $i ]] && valid=true
-        done
+        $has_default && {
+            valid=false
+            for i in $list; do
+                [[ $default == $i ]] && valid=true
+            done
 
-        $valid || optparse.throw_error "default should be in list"
+            $valid || optparse.throw_error "default should be in list"
+        }
     }
 
     [ -z "$desc" ] && optparse.throw_error "description is mandatory"
