@@ -33,6 +33,7 @@ optparse_longarguments_string="help"
 optparse_name="$(basename $0)"
 optparse_usage_header="[OPTIONS]"
 optparse_variable_set=''
+optparse_description="${optparse_name}'s help#NL"
 
 # -----------------------------------------------------------------------------------------------------------------------------
 function optparse.throw_error(){
@@ -193,6 +194,7 @@ function optparse.build(){
     cat << EOF | sed -e 's/#NL/\n/g' -e 's/#TB/\t/g'
 function usage(){
 cat >&2 << XXX
+${optparse_description}
 usage: $optparse_name $optparse_usage_header
 OPTIONS:
 $optparse_usage
