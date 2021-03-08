@@ -104,7 +104,7 @@ function optparse.warn(){
 function optparse.group(){
     local group="$1"
     [ ! -z "$group" ] && [ ! -z "$optparse_usage" ] && group="#NL$group"
-    optparse_usage+="echo \"$group\";"
+    optparse_usage+="echo \"$group\";#NL"
 }
 
 # -----------------------------------------------------------------------------------------------------------------------------
@@ -301,26 +301,21 @@ function optparse.define(){
                     _optparse_extra+="#TB#TB#TBDefault: '$default'#NL"
             }
             
-            ## Break to lines, maybe header and then description?
-            
             [ ! -z "$_optparse_extra" ] && {
             
                 _optparse_extra="cat >&2 << EOE#NL${_optparse_extra}EOE#NL"
                 
-                [ "$behaviour_extra" == "explicit" ]  && {
+                [ "$behaviour_extra" == "explicit" ]  && 
                     _optparse_extra="if [[ \$1 == "true" ]]; then#NL$_optparse_extra#NLfi#NL"
-                }
                 
                 _optparse_usage+="$_optparse_extra"
-            
             }
         }
         
-        [ "$behaviour_help" == "explicit" ] && {
+        [ "$behaviour_help" == "explicit" ] && 
             _optparse_usage="if [[ \$1 == "true" ]]; then#NL$_optparse_usage#NLfi#NL"
-        }
     
-        optparse_usage+="#NL$_optparse_usage"
+        optparse_usage+="$_optparse_usage"
         
         #echo "$_optparse_usage"
     }
@@ -328,56 +323,40 @@ function optparse.define(){
     $has_default && [ ! -z "$variable" ] &&
         optparse_defaults+="#NL${variable}='${default}'"
     
-    local validate_variable="
-        $is_list && {
-            $debug && echo \"Validating '\$optparse_processing_arg_value' against list \"$list\" for '\$_optparse_arg_errorname'\"
-            valid=false
-            for i in $list; do
-                [[ \$optparse_processing_arg_value == \$i ]] && valid=true && break
-            done
-    
-            \$valid || optparse.usage false \"ERROR: invalid value for argument \\\"\$_optparse_arg_errorname\\\"\" 1
-        }
-        $has_variable && [[ -z \${${variable}:-$($has_default && echo 'DEF' || echo '')} ]] && optparse.usage false \"ERROR: (\$_optparse_arg_errorname) requires input value\" 1"
+    local validate_variable="$is_list && {
+                    valid=false
+                    for i in $list; do
+                        [[ \$optparse_processing_arg_value == \$i ]] && valid=true && break
+                    done
+                    \$valid || optparse.usage false \"ERROR: invalid value for argument \\\"\$_optparse_arg_errorname\\\"\" 1
+                }
+                $has_variable && [[ -z \${${variable}:-$($has_default && echo 'DEF' || echo '')} ]] && optparse.usage false \"ERROR: (\$_optparse_arg_errorname) requires input value\" 1"
         
-    local dispatch_caller=""
+    local dispatch_caller="# No Dispatcher"
     
     [ ! -z "$dispatch" ] && {
         [ -z "$dispatch_var" ] && {
             $has_variable && dispatch_var="\"\$${variable}\"" || dispatch_var="\"\$optparse_processing_arg_value\""
         }
-        dispatch_caller="
-            $debug && echo \"Dispatching to caller \\\`$dispatch $dispatch_var\\\` for '\$_optparse_arg_errorname'\"
-            ${dispatch} ${dispatch_var}"
+        dispatch_caller="${dispatch} ${dispatch_var}"
     }
     
     [ ! -z "$shortname" ] && {
         optparse_process_short+="
             ${shortname})
                 _optparse_arg_errorname=\"$short\"
-                $debug && echo \"Processing '\$_optparse_arg_errorname'\"
                 optparse_processing_arg_value=\"\"
-                ( $flag || $has_val ) && {
-                    optparse_processing_arg_value=\"$val\"
-                    ( $debug && echo \"Assigned arg_value of '\$optparse_processing_arg_value' for '\$_optparse_arg_errorname'\" ) || true
-                } || {
+                ( $flag || $has_val ) && optparse_processing_arg_value=\"$val\"  || {
                     $has_variable && {
-                        $debug && echo \"Determining arg_value for '\$_optparse_arg_errorname'\"
                         optparse_processing_arg_value=\"\$optparse_processing_arg\";
                         if [ -z \"\$optparse_processing_arg_value\" ]; then
-                            $debug && echo \"Used space-separated argument '\$optparse_processing_arg_value' for '\$_optparse_arg_errorname'\"
-                            optparse_processing_arg_value=\"\$1\"
-                            shift
+                            optparse_processing_arg_value=\"\$1\" && shift
                         else
-                            $debug && echo \"Used trailing argument '\$optparse_processing_arg_value' for '\$_optparse_arg_errorname'\"
                             optparse_processing_arg=''
                         fi
                     }
                 }
-                $has_variable && {
-                    ${variable}=\"\$optparse_processing_arg_value\"
-                    $debug && echo \"Set variable \\\`${variable}\\\` to '\$${variable}' from '\$optparse_processing_arg_value' for '\$_optparse_arg_errorname'\"
-                }
+                $has_variable && ${variable}=\"\$optparse_processing_arg_value\"
                 $validate_variable
                 $dispatch_caller
                 continue
@@ -388,16 +367,11 @@ function optparse.define(){
         optparse_process_long+="
             ${longname})
                 _optparse_arg_errorname=\"$long\"
-                $debug && echo \"Processing '\$_optparse_arg_errorname'\"
                 $has_val && {
                     [ ! -z \"\$optparse_processing_arg_value\" ] && optparse.usage true 'ERROR: (${errorname}) does not accept user input' 1
                     optparse_processing_arg_value=\"$val\"
-                    $debug && echo \"Assigned arg_value of '\$optparse_processing_arg_value' for '\$_optparse_arg_errorname'\"
                 }
-                $has_variable && {
-                    ${variable}=\"\$optparse_processing_arg_value\"
-                    $debug && echo \"Set variable \\\`${variable}\\\` to '\$${variable}' from '\$optparse_processing_arg_value' for '\$_optparse_arg_errorname'\"
-                }
+                $has_variable && ${variable}=\"\$optparse_processing_arg_value\"
                 $validate_variable
                 $dispatch_caller
                 continue
@@ -483,10 +457,6 @@ function optparse.build(){
     
     # Function usage
     cat <<EOF | sed -e 's/#NL/\n/g' -e 's/#TB/\t/g'
-$optparse_debug && ( declare -F "optparse.license" > /dev/null ) && {
-    echo "INFO: Re-declaring \\\`optparse.license()\\\`"
-}
-
 function optparse.license(){ cat <<EOL
 $optparse_license
 EOL
@@ -506,7 +476,11 @@ cat >&2 << EOH
 \$(printf "%${optparse_help_full_width}s %s" "Powered by optparse $optparse_version")
 \$(printf "%${optparse_help_full_width}s %s" "@see --optparse_license")
 EOH
-( [ "\$1" == "true" ] && [ ! -z "\$3" ]) && ( exit "\$3" ) || exit 3
+if [ "\$1" == "true" ] && [ ! -z "\$3" ]; then
+    exit "\$3"
+else
+    exit 3
+fi
 }
 
 # Set default variable values
@@ -519,13 +493,9 @@ while [ \$# -ne 0 ]; do
     optparse_processing_arg="\$1"
     shift
     
-    $optparse_debug && echo "Parseing \"\$optparse_processing_arg\""
-    
     case "\$optparse_processing_arg" in
         --)
-            $optparse_debug && echo "Breaking on double-hyphen"
-            optparse_processing_args+=("--")
-            break
+            optparse_processing_args+=("--") && break
             ;;
             
         --*)
@@ -534,8 +504,6 @@ while [ \$# -ne 0 ]; do
             optparse_processing_arg_value="\${optparse_processing_arg#*=}";
             
             [ "\$optparse_processing_arg_value" == "\$optparse_processing_arg_key" ] && optparse_processing_arg_value=''
-            
-            $optparse_debug && echo "Parsing Argument \$optparse_processing_arg_key with value \"\$optparse_processing_arg_value\""
             
             case "\${optparse_processing_arg_key:2}" in
                 $optparse_process_long
@@ -550,15 +518,11 @@ while [ \$# -ne 0 ]; do
             optparse_processing_arg_short="\${optparse_processing_arg:1}"
             optparse_processing_arg=''
             
-            $optparse_debug && echo "Entering Shorts Loop with \"\$optparse_processing_arg_short\""
-            
             while [ \${#optparse_processing_arg_short} -ne 0 ]; do
             
                 optparse_processing_arg_key="\${optparse_processing_arg_short:0:1}";
                 optparse_processing_arg_short="\${optparse_processing_arg_short:1}"
                 optparse_processing_arg_value='';
-                
-                $optparse_debug && echo "Parsing Short \"\$optparse_processing_arg_key\""
                 
                 case "\$optparse_processing_arg_key" in
                     $optparse_process_short
@@ -583,18 +547,7 @@ done
 # GODLY arg quote with printf, WHERE HAVE YOU BEEN??
 eval set -- "\$([ ! -z "$optparse_processing_args" ] && printf ' %q' "\${optparse_processing_args[@]}") \$(printf ' %q' "\${@}")"
 
-$optparse_debug && {
-    echo "Env String \"\$env_string\""
-    echo "Final Argument String: \$*"
-    echo "Stored Argument String: '\${optparse_processing_args[*]}'"
-    for i in "\$@"; do
-        echo "Opt \$i"
-    done
-}
-
 $optparse_variables_validate
-
-#optparse.usage && exit
 
 unset _optparse_params
 unset _optparse_param
